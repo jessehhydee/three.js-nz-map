@@ -9,8 +9,9 @@ html, body {
   height: 100vh;
   margin: 0px;
   padding: 0px;
-  background-color: #12263E;
-  color: rgb(108, 182, 224);
+  background: #0f2027;
+  background: -webkit-linear-gradient(to top, #0f2027, #203a43, #2c5364);
+  background: linear-gradient(to top, #0f2027, #203a43, #2c5364);
 }
 
 .canvas {
@@ -19,10 +20,6 @@ html, body {
   position: absolute;
   top: 0px;
   left: 0px;
-}
-
-.world_map {
-  display: none;
 }
 
 .label_container {
