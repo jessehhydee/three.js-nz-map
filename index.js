@@ -460,20 +460,20 @@ renderer,
 raycaster,
 mouse,
 isIntersecting,
+allMeshesGroup,
+locationsGroup,
 labelRenderer,
 locationLabelParent,
 locationLabelText,
 locationLabel,
+baseMesh,
 time,
 twinkleTime,
 recentlyInteracted,
 allMaterials,
 locationMaterials,
 smallMaterial,
-locationMaterial,
-baseMesh,
-allMeshesGroup,
-locationsGroup;
+locationMaterial;
 
 
 const setScene = () => {
@@ -495,13 +495,16 @@ const setScene = () => {
   });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  const pointLight = new THREE.PointLight(0x081b26, 25, 200);
-  pointLight.position.set(-50, 0, 60);
+  const pointLight = new THREE.PointLight(0x081b26, 35, 200);
+  pointLight.position.set(-25, 0, 60);
   scene.add(pointLight);
 
   raycaster      = new THREE.Raycaster();
   mouse          = new THREE.Vector2();
   isIntersecting = false;
+
+  allMeshesGroup = new THREE.Group();
+  locationsGroup = new THREE.Group(); 
 
   createLabel();
   setBaseSphere();
@@ -543,7 +546,7 @@ const setBaseSphere = () => {
   const baseSphere   = new THREE.SphereGeometry(19.5, 35, 35);
   const baseMaterial = new THREE.MeshStandardMaterial({color: 0x081b26});
   baseMesh            = new THREE.Mesh(baseSphere, baseMaterial);
-  scene.add(baseMesh);
+  allMeshesGroup.add(baseMesh);
 
 }
 
@@ -581,8 +584,8 @@ const setMap = () => {
 
   const calcPosFromLatLonRad = (lon, lat, radius = 20) => {
   
-    var phi   = (90 - lat)  * (Math.PI / 180);
-    var theta = (lon + 180) * (Math.PI / 180);
+    var phi   = (180 - lat)  * (Math.PI / 360);
+    var theta = (lon + 360) * (Math.PI / 360);
 
     const x = -(radius * Math.sin(phi) * Math.cos(theta));
     const z = (radius * Math.sin(phi) * Math.sin(theta));
@@ -610,9 +613,6 @@ const setMap = () => {
     return mat;
 
   }
-
-  allMeshesGroup = new THREE.Group();
-  locationsGroup = new THREE.Group(); 
 
   const image   = new Image;
   image.onload  = () => {

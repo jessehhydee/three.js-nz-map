@@ -22,6 +22,10 @@ html, body {
   left: 0px;
 }
 
+/* .world_map {
+  display: none;
+} */
+
 .label_container {
   width: 10px;
   height: 10px;
