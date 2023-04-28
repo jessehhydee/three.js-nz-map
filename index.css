@@ -22,10 +22,6 @@ html, body {
   left: 0px;
 }
 
-/* .world_map {
-  display: none;
-} */
-
 .label_container {
   width: 10px;
   height: 10px;
@@ -63,4 +59,19 @@ html, body {
   top: 50%;
   transform: translateY(-50%);
   right: 20px;
+}
+
+.source_btn {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  z-index: 10;
+  width: fit-content;
+  height: fit-content;
+  border-radius: 50px;
+  display: flex;
+  border: 1px solid #FFFFFF;
+  cursor: pointer;
+  background: inherit;
+  padding: 10px;
 }
