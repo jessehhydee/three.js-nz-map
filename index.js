@@ -141,11 +141,11 @@ const createLabel = () => {
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(labelRenderer.domElement);
 
-  locationLabelParent     = document.createElement('div');
+  locationLabelParent           = document.createElement('div');
   locationLabelParent.className = 'label_container';
   const locationLabelChild      = document.createElement('div');
   locationLabelChild.className  = 'label';
-  locationLabelText       = document.createElement('p');
+  locationLabelText             = document.createElement('p');
   locationLabelText.className   = 'label_p';
   const locationLabelImg        = document.createElement('img');
   locationLabelImg.className    = 'label_img';
@@ -164,7 +164,7 @@ const setBaseSphere = () => {
 
   const baseSphere   = new THREE.SphereGeometry(19.5, 35, 35);
   const baseMaterial = new THREE.MeshStandardMaterial({color: 0x081b26});
-  baseMesh            = new THREE.Mesh(baseSphere, baseMaterial);
+  baseMesh           = new THREE.Mesh(baseSphere, baseMaterial);
   allMeshesGroup.add(baseMesh);
 
 }
