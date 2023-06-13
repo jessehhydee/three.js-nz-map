@@ -8,22 +8,15 @@ const vertex = `
   #endif
 
   uniform float u_time;
-  uniform float u_mouseDown;
-  uniform float u_mouseUp;
-
-  vec3 exx(vec3 newPosition, vec3 fixedPosition) {
-    if(u_mouseDown > 0.0 && u_mouseUp > 0.0 && sin(u_time) < -1.0) return newPosition.xyz = fixedPosition.xyz;
-    else if(u_mouseDown > 0.0) return newPosition.xyz = newPosition.xyz + sin(u_time);
-    else return newPosition.xyz = fixedPosition.xyz;
-  }
+  uniform float u_maxExtrusion;
 
   void main() {
 
-    vec3 newPosition    = position;
-    vec3 fixedPosition  = position;
-    vec3 pos = exx(newPosition, fixedPosition);
+    vec3 newPosition = position;
+    if(u_maxExtrusion > 1.0) newPosition.xyz = newPosition.xyz * u_maxExtrusion + sin(u_time);
+    else newPosition.xyz = newPosition.xyz * u_maxExtrusion;
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 
   }
 `;
@@ -86,9 +79,11 @@ locationLabelParent,
 locationLabelText,
 locationLabel,
 baseMesh,
+minMouseDownFlag,
+mouseDown,
+grabbing,
 time,
 twinkleTime,
-recentlyInteracted,
 allMaterials,
 locationMaterials,
 smallMaterial,
@@ -118,9 +113,12 @@ const setScene = () => {
   pointLight.position.set(-25, 0, 60);
   scene.add(pointLight);
 
-  raycaster      = new THREE.Raycaster();
-  mouse          = new THREE.Vector2();
-  isIntersecting = false;
+  raycaster         = new THREE.Raycaster();
+  mouse             = new THREE.Vector2();
+  isIntersecting    = false;
+  minMouseDownFlag  = false;
+  mouseDown         = false;
+  grabbing          = false;
 
   allMeshesGroup = new THREE.Group();
   locationsGroup = new THREE.Group(); 
@@ -173,15 +171,13 @@ const setShaderMaterial = () => {
 
   time               = 0;
   twinkleTime        = 0.02;
-  recentlyInteracted = false;
   allMaterials       = [];
   locationMaterials  = [];
   smallMaterial      = new THREE.ShaderMaterial({
     side:     THREE.DoubleSide,
     uniforms: {
       u_time:         { value: 1.0 },
-      u_mouseDown:    { value: 0.0 },
-      u_mouseUp:      { value: 0.0 }
+      u_maxExtrusion: { value: 1.0 }
     },
     vertexShader:   vertex,
     fragmentShader: smallFragment,
@@ -190,8 +186,7 @@ const setShaderMaterial = () => {
     side:     THREE.DoubleSide,
     uniforms: {
       u_time:         { value: 1.0 },
-      u_mouseDown:    { value: 0.0 },
-      u_mouseUp:      { value: 0.0 }
+      u_maxExtrusion: { value: 1.0 }
     },
     vertexShader:   vertex,
     fragmentShader: locationFragment,
@@ -338,9 +333,11 @@ const mousemove = event => {
   const intersectsBaseMesh = raycaster.intersectObject(baseMesh);
   if(intersectsBaseMesh[0]) {
     isIntersecting = true;
-    document.body.style.cursor = 'pointer';
+    if(!grabbing) document.body.style.cursor = 'pointer';
   }
-  else document.body.style.cursor = 'default';
+  else {
+    if(!grabbing) document.body.style.cursor = 'default';
+  }
 
   const intersectsLocations = raycaster.intersectObject(locationsGroup);
   if(intersectsLocations[0]) {
@@ -357,23 +354,31 @@ const mousemove = event => {
 
 const mousedown = () => {
 
-  if(!isIntersecting || 
-    allMaterials[allMaterials.length - 1].uniforms.u_mouseDown.value === 1.0) return;
+  if(!isIntersecting) return;
 
   gsap.to(baseMesh.scale, {x: 0.95, y: 0.95, z: 0.95, duration: 1});
 
   allMaterials.forEach(el => {
-    el.uniforms.u_mouseDown.value = 1.0;
+    gsap.to(el.uniforms.u_maxExtrusion, {value: 1.07});
   });
+
+  mouseDown         = true;
+  minMouseDownFlag  = false;
+
+  setTimeout(() => {
+    minMouseDownFlag = true;
+    if(!mouseDown) mouseup();
+  }, 500);
+
+  document.body.style.cursor  = 'grabbing';
+  grabbing                    = true;
 
 }
 
 const mouseup = () => {
 
-  if(!isIntersecting || recentlyInteracted) return;
-
-  recentlyInteracted = true;
-  setTimeout(() => recentlyInteracted = false, 1500);
+  mouseDown = false;
+  if(!minMouseDownFlag) return;
 
   gsap.to(baseMesh.scale, {
     x: 1, 
@@ -383,12 +388,12 @@ const mouseup = () => {
   });
 
   allMaterials.forEach(el => {
-    el.uniforms.u_mouseUp.value = 1.0;
-    setTimeout(() => {
-      el.uniforms.u_mouseDown.value = 0.0;
-      el.uniforms.u_mouseUp.value   = 0.0;
-    }, 100);
+    gsap.to(el.uniforms.u_maxExtrusion, {value: 1.0, duration: 0.15});
   });
+
+  grabbing = false;
+  if(isIntersecting) document.body.style.cursor = 'pointer';
+  else document.body.style.cursor = 'default';
 
 }
 
